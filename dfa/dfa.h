@@ -54,4 +54,5 @@ bool compareArrays(int len, int * arr1, int * arr2);
 //Minimize a DFA
 bool arePartitionsEquals(int ** partition, int ** partition2, int nLines);
 bool arePartitionLinesEquals(int * line, int * line2);
+
 DFA minimiseDFA(DFA automaton);

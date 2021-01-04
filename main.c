@@ -3,7 +3,7 @@
 
 #include "utils/printAutomatons.h"
 
-int main(void) {
+int main(int argc, char ** argv) {
 
 	// NFA
 
@@ -107,5 +107,5 @@ int main(void) {
 	DFA minAut = minimiseDFA(dAutomaton);
 	printDFA("minified DFA dAutomaton", &minAut);
 
-    return 0;
+	return EXIT_SUCCESS;
 }

@@ -175,8 +175,8 @@ DFA minimiseDFA(DFA automaton) {
 	partition = malloc( automaton.nStates );
 	oldPartition = malloc( automaton.nStates );
 	for (int i = 0; i < automaton.nStates; i++){
-		partition[i] = malloc( 256 + 1 * sizeof(int) );
-		oldPartition[i] = malloc( 256 + 1 * sizeof(int) );
+		partition[i] = malloc( (256 + 1) * sizeof(int) );
+		oldPartition[i] = malloc( (256 + 1) * sizeof(int) );
 	}
 
 
@@ -191,18 +191,12 @@ DFA minimiseDFA(DFA automaton) {
 		}
 	}
 
-		for (int i = 0; i<automaton.nStates; i++){
-			for (int character = 0; character < 105; character++){
-				printf("%d", partition[i][character]);
-			}
-			printf("\n");
-		}
-		printf("\n\n");
-
 	// main loop
 	do {
 		int count = 0;
-		memcpy(oldPartition, partition, automaton.nStates*(256 + 1) * sizeof(int));
+		for (int i = 0; i < automaton.nStates; i++){
+			memcpy(oldPartition[i], partition[i], (256+1) * sizeof(int));
+		}
 
 		for (int partitionLine = 0; partitionLine < automaton.nStates; ++partitionLine) {
 			bool match = false;
@@ -225,27 +219,8 @@ DFA minimiseDFA(DFA automaton) {
 			}
 		}
 
-
-		for (int i = 0; i<automaton.nStates; i++){
-			for (int character = 0; character < 105; character++){
-				printf("%d", partition[i][character]);
-			}
-			printf("\t");
-
-			// for (int character = 0; character < 100; character++){
-			// 	printf("%d ", oldPartition[i][character]);
-			// }
-			printf("\n");
-		}
-			scanf(" %d", &count);
-
-
-
 	} while ( !arePartitionsEquals(partition, oldPartition, automaton.nStates) );
 
-
-
-	printf("Minimisation : \n");
 	for (int partitionLine = 0; partitionLine < automaton.nStates; ++partitionLine) {
 		bool match = false;
 
@@ -253,7 +228,7 @@ DFA minimiseDFA(DFA automaton) {
 			if (arePartitionLinesEquals(oldPartition[partitionLine], oldPartition[partitionLine-i])){
 				partition[0][partitionLine] = partitionLine-i;
 				match = true;
-				printf("%d = %d\n", partitionLine, partitionLine-i);
+				//printf("%d = %d\n", partitionLine, partitionLine-i);
 			}
 		}
 	}
@@ -265,23 +240,13 @@ DFA minimiseDFA(DFA automaton) {
 
 bool arePartitionsEquals(int ** partition, int ** partition2, int nLines){
 	for (int i = 0; i<nLines; i++){
-		if ( arePartitionLinesEquals(partition[i], partition2[i]) ){
+		if ( !arePartitionLinesEquals(partition[i], partition2[i]) ){
 			return false;
 		}
 	}
-
 	return true;
 }
 
 bool arePartitionLinesEquals(int * line, int * line2){
-
-	for (int i = 0; i < 256 + 1; i++){
-		if ( line[i] != line2[i] ){
-			printf("%d ne %d\n", line[i], line2[i]);
-
-			return false;
-		}
-	}
-
-	return true;
+	return compareArrays(256+1, line, line2);
 }
