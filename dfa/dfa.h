@@ -13,11 +13,10 @@ typedef struct {
 	unsigned int id;
 
 	bool terminal;
-	//By convention, state will be considered initial when id==0
-	//It implies that our automatons have at most 1 initial state
+	// State will be considered initial when id==0
 
-	//Stores the transition for each possible character
-	//-1 for no transition, destination state id for transition
+	// Stores the transition for each possible character
+	// -1 for no transition, destination state id for transition
 	int transitions [256];
 
 } DState;
@@ -49,8 +48,10 @@ typedef struct {
 bool testWord_DFA(DFA automaton, char * string);
 
 //Converts NFA to DFA
-DFA powersetConstruction(NFA automaton);
+DFA initDFAfromNFA(NFA automaton);
 bool compareArrays(int len, int * arr1, int * arr2);
 
 //Minimize a DFA
+bool arePartitionsEquals(int ** partition, int ** partition2, int nLines);
+bool arePartitionLinesEquals(int * line, int * line2);
 DFA minimiseDFA(DFA automaton);

@@ -21,7 +21,7 @@ bool testWord_DFA(DFA automaton, char * string) {
 
 
 
-DFA powersetConstruction(NFA automaton) {
+DFA initDFAfromNFA(NFA automaton) {
 
 	//0) Initialization
 
@@ -168,71 +168,120 @@ bool compareArrays(int len, int * arr1, int * arr2) {
 
 
 DFA minimiseDFA(DFA automaton) {
-	// using Myphill-Nerode Theorem
+		// using Moore's algorithm
 
-	// 1 - Draw a table for all pairs of states (i, j) w/ i terminal & j not terminal
-	int ** pairTable = (int **) malloc(automaton.nStates * sizeof(int *));
-	for (int i = 0; i < automaton.nStates; ++i) {
-		pairTable[i] = (int *) malloc(automaton.nStates * sizeof(int));
-
-		for (int j = 0; j < automaton.nStates; j++)
-			pairTable[i][j] = -1;
+	// partition declaration
+	int ** partition, ** oldPartition;
+	partition = malloc( automaton.nStates );
+	oldPartition = malloc( automaton.nStates );
+	for (int i = 0; i < automaton.nStates; i++){
+		partition[i] = malloc( 256 + 1 * sizeof(int) );
+		oldPartition[i] = malloc( 256 + 1 * sizeof(int) );
 	}
 
-	// 2 - Look for all terminal states
-	int * terminalState = (int *) malloc(automaton.nStates * sizeof(int));
-	for(int i=0; i<automaton.nStates; i++) {
-		terminalState[i] = automaton.states[i].terminal;
+
+	// init fist partition
+	for (int i = 0; i < automaton.nStates; i++){
+		partition[0][i] = automaton.states[i].terminal;
 	}
-
-	// 3 - xor each cell with others to fill the pairTable
-	// printf("  0 1 2 3\n");
-	for (int i = 0; i < automaton.nStates; ++i) {
-		// printf("%d ", i);
-
-		for (int j = 0; j < automaton.nStates; ++j) {
-			pairTable[i][j] = (terminalState[i] ^ terminalState[j]) ? -2 : -1;
-
-			if (i == j) pairTable[i][j] = -1;
-
-			// printf("%d ", pairTable[i][j]);
+	for (int i = 0; i<automaton.nStates; i++){
+		for (int character = 0; character < 256 + 1; character++){
+			if (automaton.states[i].transitions[character] != -1)
+				partition[i][character+1] = automaton.states[automaton.states[i].transitions[character]].terminal;
 		}
-		// printf("\n");
 	}
 
-	// Repeat this step until we cannot mark anymore states
-	// printf("\n  0 1 2 3\n");
-	for (int i = 0; i < automaton.nStates; ++i) {
-		// printf("%d ", i);
+		for (int i = 0; i<automaton.nStates; i++){
+			for (int character = 0; character < 105; character++){
+				printf("%d", partition[i][character]);
+			}
+			printf("\n");
+		}
+		printf("\n\n");
 
-		for (int j = 0; j < automaton.nStates; ++j) {
-			if (!pairTable[i][j]){
-				for(int c = 0; c < 256; c++){
-					if (automaton.states[i].transitions[c] != -1 && automaton.states[j].transitions[c] != -1){
-						pairTable[i][j] = pairTable[automaton.states[i].transitions[c]][automaton.states[j].transitions[c]] != -1 ? c : -1;
-					}
+	// main loop
+	do {
+		int count = 0;
+		memcpy(oldPartition, partition, automaton.nStates*(256 + 1) * sizeof(int));
+
+		for (int partitionLine = 0; partitionLine < automaton.nStates; ++partitionLine) {
+			bool match = false;
+
+			for (int i = partitionLine; i >= 0 && match == false; i--){
+				if ( arePartitionLinesEquals(oldPartition[partitionLine], oldPartition[partitionLine-i]) ){
+					partition[0][partitionLine] = partitionLine-i;
+					match = true;
 				}
 			}
-
-			// printf("%d ", pairTable[i][j]);
-		}
-		// printf("\n");
-	}
-
-	// Combine all the unmarked pair and make them a single state in the reduced DFA
-	// printf("\n  0 1 2 3\n");
-	for (int i = 0; i < automaton.nStates; ++i) {
-		// printf("%d ", i);
-
-		for (int j = 0; j < automaton.nStates; ++j) {
-			if (pairTable[i][j] > -1){ // i and j are indistinguables
-				// printf("states %d & %d are indistinguables\n", i, j);
+			if (match == false){
+				partition[0][partitionLine] = count++;
 			}
-
-			// printf("%d ", pairTable[i][j]);
 		}
-		// printf("\n");
+
+		for (int i = 0; i<automaton.nStates; i++){
+			for (int character = 0; character < 256 + 1; character++){
+				if (automaton.states[i].transitions[character] != -1)
+					partition[i][character+1] = partition[i][automaton.states[i].transitions[character]+1];
+			}
+		}
+
+
+		for (int i = 0; i<automaton.nStates; i++){
+			for (int character = 0; character < 105; character++){
+				printf("%d", partition[i][character]);
+			}
+			printf("\t");
+
+			// for (int character = 0; character < 100; character++){
+			// 	printf("%d ", oldPartition[i][character]);
+			// }
+			printf("\n");
+		}
+			scanf(" %d", &count);
+
+
+
+	} while ( !arePartitionsEquals(partition, oldPartition, automaton.nStates) );
+
+
+
+	printf("Minimisation : \n");
+	for (int partitionLine = 0; partitionLine < automaton.nStates; ++partitionLine) {
+		bool match = false;
+
+		for (int i = partitionLine; i >= 0 && match == false; i--){
+			if (arePartitionLinesEquals(oldPartition[partitionLine], oldPartition[partitionLine-i])){
+				partition[0][partitionLine] = partitionLine-i;
+				match = true;
+				printf("%d = %d\n", partitionLine, partitionLine-i);
+			}
+		}
 	}
+
 
 	return automaton;
+}
+
+
+bool arePartitionsEquals(int ** partition, int ** partition2, int nLines){
+	for (int i = 0; i<nLines; i++){
+		if ( arePartitionLinesEquals(partition[i], partition2[i]) ){
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool arePartitionLinesEquals(int * line, int * line2){
+
+	for (int i = 0; i < 256 + 1; i++){
+		if ( line[i] != line2[i] ){
+			printf("%d ne %d\n", line[i], line2[i]);
+
+			return false;
+		}
+	}
+
+	return true;
 }

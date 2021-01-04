@@ -5,69 +5,54 @@
 
 int main(void) {
 
-	//Testing NFA
+	// NFA
 
-	NFA aut1;
-	aut1.states = NULL;
-	aut1.nStates = 0;
+	NFA a;
 
-	NFA aut2;
-	aut2.states = NULL;
-	aut2.nStates = 0;
+	initChar(&a, 'a');
+	printNFA("a", a);
 
-	initChar(&aut1, 'a');
-	printNFA("a", aut1);
+	NFA b;
+	initChar(&b, 'b');
+	printNFA("b", b);
 
-	initChar(&aut2, 'b');
-	printNFA("b", aut2);
+	NFA a_dot_b;
+	autConcatenation(&a_dot_b, a, b);
+	printNFA("a·b", a_dot_b);
 
-	NFA aut3;
-	aut3.states = NULL;
-	aut3.nStates = 0;
-
-	autConcatenation(&aut3, aut1, aut2);
-	printNFA("a·b", aut3);
-
-	NFA aut7;
-	aut7.states = NULL;
-	aut7.nStates = 0;
-	autUnion(&aut7, aut1, aut2);
-	printNFA("a|b", aut7);
+	NFA a_or_b;
+	autUnion(&a_or_b, a, b);
+	printNFA("a|b", a_or_b);
 
 
-	NFA aut4;
-	aut4.states = NULL;
-	aut4.nStates = 0;
+	NFA c;
+	initChar(&c, 'c');
+	printNFA("c", c);
 
-	initChar(&aut4, 'c');
-	printNFA("c", aut4);
+	NFA a_dot_b_dot_c;
+	autConcatenation(&a_dot_b_dot_c, a_dot_b, c);
+	printNFA("(a·b)·c", a_dot_b_dot_c);
 
-	NFA aut5;
-	aut5.states = NULL;
-	aut5.nStates = 0;
-
-	autConcatenation(&aut5, aut3, aut4);
-	printNFA("(a·b)·c", aut5);
-
-	NFA aut6;
-	aut6.states = NULL;
-	aut6.nStates = 0;
-
-	autUnion(&aut6, aut5, aut4);
-	printNFA("((a·b)·c)|c", aut6);
+	NFA a_dot_b_dot_c_or_C;
+	autUnion(&a_dot_b_dot_c_or_C, a_dot_b_dot_c, c);
+	printNFA("((a·b)·c)|c", a_dot_b_dot_c_or_C);
 
 
-	kleeneClosure(&aut6);
-	printNFA("(((a·b)·c)|c)*", aut6);
+	kleeneClosure(&a_dot_b_dot_c_or_C);
+	printNFA("(((a·b)·c)|c)*", a_dot_b_dot_c_or_C);
 
 
-	//Testing DFA
+
+	// DFA
+
+	// hardcoding a non-deterministic automaton wich can be converted to a deterministic one
+
 	NFA automaton;
 
 	automaton.states = (State*) malloc(4 * sizeof(State));
 	automaton.nStates = 4;
 
-	//State 0
+		//State 0
 	automaton.states[0].id = 0;
 	automaton.states[0].terminal = false;
 
@@ -83,7 +68,7 @@ int main(void) {
 	automaton.states[0].transitions[2].to = 2;
 	automaton.states[0].transitions[2].character = 'b';
 
-	//State 1
+		//State 1
 	automaton.states[1].id = 1;
 	automaton.states[1].terminal = false;
 
@@ -93,7 +78,7 @@ int main(void) {
 	automaton.states[1].transitions[0].to = 3;
 	automaton.states[1].transitions[0].character = 'a';
 
-	//State 2
+		//State 2
 	automaton.states[2].id = 2;
 	automaton.states[2].terminal = false;
 
@@ -103,20 +88,21 @@ int main(void) {
 	automaton.states[2].transitions[0].to = 3;
 	automaton.states[2].transitions[0].character = 'c';
 
-	//State 3
+		//State 3
 	automaton.states[3].id = 3;
 	automaton.states[3].terminal = true;
 
 	automaton.states[3].transitions = NULL;
 	automaton.states[3].nTransitions = 0;
 
-	printNFA("NFA dAutomaton", automaton);
+	printNFA("test automaton", automaton);
 
-	DFA dAutomaton = powersetConstruction(automaton);
+	DFA dAutomaton = initDFAfromNFA(automaton);
 
-	printDFA("DFA construction of dAutomaton", &dAutomaton);
+	printDFA("d automaton generated", &dAutomaton);
 
-	printf("Automaton %s %s the word %s \n\n", "dAutomaton", testWord_DFA(dAutomaton, "bc") ? "detects" : "does not detects", "bc");
+	printf("The automaton \"%s\" %s the word : %s\n", "dAutomaton", testWord_DFA(dAutomaton, "bc") ? "detects" : "does not detect", "bc");
+	printf("The automaton \"%s\" %s the word : %s \n\n", "dAutomaton", testWord_DFA(dAutomaton, "bcd") ? "detects" : "does not detect", "bcd");
 
 	DFA minAut = minimiseDFA(dAutomaton);
 	printDFA("minified DFA dAutomaton", &minAut);

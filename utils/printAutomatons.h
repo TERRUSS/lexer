@@ -3,29 +3,29 @@
 
 void printNFA(const char * title, NFA automaton){
 
-    printf(" ---- %s ----\n", title);
+    printf("===== %s (NFA) =====\n", title);
     int i,j;
     for(i=0; i<automaton.nStates; i++) {
-        printf("\tState %d \n", i);
+        printf("\tState %d :\n", i);
 
         for(j=0; j<automaton.states[i].nTransitions; j++) {
-            printf("\t\t --(%c)-> %d\n", automaton.states[i].transitions[j].character, automaton.states[i].transitions[j].to);
+            printf("\t\t--(%c)-> %d\n", automaton.states[i].transitions[j].character, automaton.states[i].transitions[j].to);
         }
 
         if(automaton.states[i].terminal) {
-            printf("\t\t --x \n");
+            printf("\t\t--x \n");
         }
     }
-    printf(" --------------\n\n");
+    printf("\n\n");
 
 }
 
 void printDFA(const char * title, DFA* automaton){
 
-    printf(" ---- %s ---- \n", title);
+    printf("===== %s (DFA) =====\n", title);
     int i, character;
     for(i=0; i<automaton->nStates; i++) {
-        printf("\t State %d\n", automaton->states[i].id);
+        printf("\tState %d :\n", automaton->states[i].id);
 
         for(character=0; character<256; character++) {
 
@@ -35,13 +35,13 @@ void printDFA(const char * title, DFA* automaton){
                 continue;
             }
 
-            printf("\t\t --(%c)-> %d\n", character, from);
+            printf("\t\t--(%c)-> %d\n", character, from);
         }
 
         if(automaton->states[i].terminal) {
-            printf("\t\t --x \n");
+            printf("\t\t--x \n");
         }
     }
-    printf(" --------------\n\n");
+    printf("\n\n");
 
 }
